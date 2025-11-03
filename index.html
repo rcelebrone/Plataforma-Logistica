@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Logística</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a biblioteca de ícones Lucide (Corrigido) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Estilo para a barra de rolagem (web) */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4c4c4;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Classes para o modo escuro */
+        .dark .bg-gray-100 { background-color: #1a202c; }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark .text-black { color: #e2e8f0; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .border-gray-200 { border-color: #4a5568; }
+        .dark .bg-gray-50 { background-color: #2d3748; }
+        .dark .bg-gray-900 { background-color: #1a202c; }
+        .dark .text-gray-300 { color: #e2e8f0; }
+        .dark .hover\:bg-gray-700:hover { background-color: #4a5568; }
+        .dark input { background-color: #4a5568; color: #e2e8f0; }
+        .dark table th { background-color: #2d3748; }
+        .dark table tr:nth-child(even) { background-color: #2d3748; }
+        .dark table tr:nth-child(odd) { background-color: #2c3645; }
+        .dark table tr:hover { background-color: #4a5568; }
+
+        /* Esconde o texto quando a sidebar está colapsada */
+        #sidebar.w-20 .sidebar-text {
+            display: none;
+        }
+        /* Ajusta o padding do ícone quando colapsado */
+        #sidebar.w-20 .sidebar-link {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        /* Centraliza o logo quando colapsado */
+         #sidebar.w-20 #logo-container {
+            justify-content: center;
+        }
+        /* Esconde o botão de colapsar e mostra o de expandir */
+        #sidebar:not(.w-20) #expand-icon {
+            display: none;
+        }
+        #sidebar.w-20 #collapse-icon {
+            display: none;
+        }
+        #sidebar.w-20 #user-info span {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- =========== TELA DE LOGIN =========== -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+        <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-lg shadow-xl border border-gray-200">
+            <!-- Logo Simples -->
+            <div class="flex justify-center text-orange-500">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" fill="currentColor" fill-opacity="0.1"/>
+                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-center text-gray-800">Plataforma Logística</h2>
+            <p class="text-sm text-center text-gray-600">Use um dos emails de demo (senha: 123456)</p>
+
+            <!-- Formulário de Login -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="email-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input type="email" id="email-input" name="email" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                           placeholder="usuario@madeiramadeira.com.br">
+                </div>
+                <div>
+                    <label for="password-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                    <input type="password" id="password-input" name="password" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                           placeholder="••••••••">
+                </div>
+                
+                <!-- Mensagem de Erro -->
+                <div id="login-error-msg" class="hidden text-sm text-red-600">
+                    Email ou senha inválidos. (Senha de demo: 123456)
+                </div>
+
+                <button type="submit" class="w-full px-4 py-3 font-semibold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition-colors">
+                    Entrar
+                </button>
+            </form>
+            
+            <div class="text-xs text-center text-gray-500 dark:text-gray-400">
+                <p class="font-medium">Usuários de demo:</p>
+                <p>rodrigo.celebrone@madeiramadeira.com.br</p>
+                <p>luiz.pontara@madeiramadeira.com.br</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== LAYOUT DA APLICAÇÃO =========== -->
+    <div id="app-layout" class="hidden">
+        <!-- Barra Lateral Esquerda -->
+        <nav id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-900 text-gray-300 flex flex-col transition-all duration-300 z-30 shadow-lg">
+            <!-- Logo e Botão de Colapsar -->
+            <div id="logo-container" class="flex items-center justify-between h-16 px-4 border-b border-gray-700">
+                <div class="flex items-center">
+                    <span class="text-orange-500" data-lucide="package"></span>
+                    <span class="ml-3 text-lg font-bold text-white sidebar-text">Logística</span>
+                </div>
+                <button onclick="toggleSidebar()" class="p-1 rounded-full hover:bg-gray-700">
+                    <span id="collapse-icon" data-lucide="chevrons-left" class="w-5 h-5"></span>
+                    <span id="expand-icon" data-lucide="chevrons-right" class="w-5 h-5"></span>
+                </button>
+            </div>
+
+            <!-- Links dos Módulos -->
+            <div id="module-links" class="flex-1 py-4 space-y-2 overflow-y-auto">
+                <!-- Links serão injetados pelo JS -->
+            </div>
+
+            <!-- Menu Inferior (Configurações e Usuário) -->
+            <div class="border-t border-gray-700">
+                <!-- Link de Configurações -->
+                <a href="#" onclick="showView('settings_access')" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <span data-lucide="settings" class="w-5 h-5"></span>
+                    <span class="ml-4 sidebar-text">Configurações</span>
+                </a>
+                
+                <!-- Perfil do Usuário e Logout -->
+                <div id="user-info" class="flex items-center justify-between p-4 bg-gray-800">
+                    <div class="flex items-center overflow-hidden">
+                        <span class="flex-shrink-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm" id="user-initials"></span>
+                        <div class="ml-3 overflow-hidden sidebar-text">
+                            <div class="text-sm font-medium text-white truncate" id="user-name"></div>
+                            <div class="text-xs text-gray-400 truncate" id="user-email"></div>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="p-1 rounded-full hover:bg-gray-700 text-gray-400 hover:text-white transition-colors sidebar-text">
+                        <span data-lucide="log-out" class="w-5 h-5"></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Conteúdo Principal -->
+        <main id="main-content" class="ml-64 bg-gray-100 min-h-screen transition-all duration-300">
+            
+            <!-- Tela de Boas-Vindas -->
+            <div id="welcome-view" class="p-8">
+                <h1 class="text-3xl font-bold text-gray-800">Bem-vindo à Plataforma Logística</h1>
+                <p class="mt-2 text-gray-600">Selecione um módulo na barra lateral esquerda para começar.</p>
+            </div>
+
+            <!-- Container do Iframe -->
+            <div id="iframe-view" class="hidden w-full h-screen">
+                <div id="iframe-error" class="hidden p-8 text-center bg-red-100 border border-red-400 text-red-700 rounded-lg m-8">
+                    <h3 class="font-bold">Não foi possível carregar o módulo</h3>
+                    <p class="mt-2">O site <strong id="blocked-url"></strong> não permite ser incorporado em outras páginas (devido a restrições de 'X-Frame-Options').</p>
+                    <p class="mt-2 text-sm">Em um ambiente real, o módulo abriria aqui.</p>
+                </div>
+                <iframe id="module-iframe" class="w-full h-full border-0"></iframe>
+            </div>
+
+            <!-- Container das Configurações -->
+            <div id="settings-view" class="hidden p-6 lg:p-10">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Configurações</h1>
+                
+                <!-- Abas de Navegação das Configurações -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav id="settings-tabs" class="flex space-x-6 -mb-px" aria-label="Tabs">
+                        <a href="#" data-tab="access" class="settings-tab-link border-orange-500 text-orange-600 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                            Regras de Acesso
+                        </a>
+                        <a href="#" data-tab="urls" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                            URLs dos Módulos
+                        </a>
+                        <a href="#" data-tab="theme" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                            Tema e Aparência
+                        </a>
+                        <a href="#" data-tab="users" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                            Usuários
+                        </a>
+                    </nav>
+                </div>
+                
+                <!-- Conteúdo das Abas de Configurações -->
+                <div id="settings-content" class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <!-- O conteúdo será injetado pelo JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- ESTADO DA APLICAÇÃO ---
+
+        let currentUser = null;
+        let isSidebarCollapsed = false;
+
+        // Definição de todos os módulos existentes na plataforma
+        const allModules = [
+            { id: 'parca', name: 'Parça (Salvados)', icon: 'archive' },
+            { id: 'tms', name: 'TMS (iSend)', icon: 'truck' },
+            { id: 'reversa', name: 'Logística Reversa', icon: 'undo' },
+            { id: 'portal_parceiro', name: 'Portal Parceiro', icon: 'handshake' },
+            { id: 'cotacao', name: 'Cotação Frete', icon: 'dollar-sign' },
+            { id: 'portal_fornecedor', name: 'Portal Fornecedor', icon: 'building' }
+        ];
+
+        // Regras de acesso iniciais (mutáveis)
+        let userAccess = {
+            'rodrigo.celebrone@madeiramadeira.com.br': ['parca', 'tms', 'reversa', 'portal_parceiro'],
+            'luiz.pontara@madeiramadeira.com.br': ['cotacao', 'reversa', 'portal_fornecedor']
+        };
+
+        // URLs dos módulos (mutáveis)
+        let moduleUrls = {
+            'tms': 'https://app.isendbrasil.com.br/',
+            'portal_parceiro': 'https://eaglercraft.com/',
+            'parca': 'https://example.com/parca',
+            'reversa': 'https://example.com/reversa',
+            'cotacao': 'https://example.com/cotacao',
+            'portal_fornecedor': 'https://example.com/portal-fornecedor'
+        };
+
+        // Usuários de demonstração
+        const demoUsers = [
+            { email: 'rodrigo.celebrone@madeiramadeira.com.br', name: 'Rodrigo Celebrone' },
+            { email: 'luiz.pontara@madeiramadeira.com.br', name: 'Luiz Pontara' }
+        ];
+
+
+        // --- ELEMENTOS DOM ---
+        const loginScreen = document.getElementById('login-screen');
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const loginErrorMsg = document.getElementById('login-error-msg');
+        
+        const appLayout = document.getElementById('app-layout');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const moduleLinksContainer = document.getElementById('module-links');
+        const welcomeView = document.getElementById('welcome-view');
+        const iframeView = document.getElementById('iframe-view');
+        const moduleIframe = document.getElementById('module-iframe');
+        const iframeError = document.getElementById('iframe-error');
+        const blockedUrlEl = document.getElementById('blocked-url');
+        const settingsView = document.getElementById('settings-view');
+        const settingsTabs = document.getElementById('settings-tabs');
+        const settingsContent = document.getElementById('settings-content');
+        
+        const userNameEl = document.getElementById('user-name');
+        const userEmailEl = document.getElementById('user-email');
+        const userInitialsEl = document.getElementById('user-initials');
+
+        // --- FUNÇÕES PRINCIPAIS ---
+
+        /**
+         * Realiza o login do usuário após a validação.
+         */
+        function performLogin(userEmail) {
+            currentUser = demoUsers.find(u => u.email === userEmail);
+            if (!currentUser) return; // Checagem extra
+
+            // Atualiza info do usuário na sidebar
+            userNameEl.textContent = currentUser.name;
+            userEmailEl.textContent = currentUser.email;
+            userInitialsEl.textContent = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            // Renderiza a sidebar e mostra o app
+            renderSidebar();
+            loginScreen.classList.add('hidden');
+            appLayout.classList.remove('hidden');
+            showView('welcome');
+            
+            // Limpa o formulário
+            loginForm.reset();
+            
+            // Remove o foco dos botões
+            document.activeElement.blur();
+        }
+
+        /**
+         * Realiza o logout do usuário.
+         */
+        function logout() {
+            currentUser = null;
+            loginScreen.classList.remove('hidden');
+            appLayout.classList.add('hidden');
+        }
+
+        /**
+         * Alterna a barra lateral entre colapsada e expandida.
+         */
+        function toggleSidebar() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            if (isSidebarCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-20');
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-64');
+            }
+            // Atualiza os ícones após a animação
+            setTimeout(lucide.createIcons, 300);
+        }
+
+        /**
+         * Renderiza os links dos módulos na barra lateral com base no acesso do usuário.
+         */
+        function renderSidebar() {
+            moduleLinksContainer.innerHTML = '';
+            const accessibleModuleIds = userAccess[currentUser.email] || [];
+            const accessibleModules = allModules.filter(m => accessibleModuleIds.includes(m.id));
+
+            accessibleModules.forEach(module => {
+                const link = document.createElement('a');
+                link.href = '#';
+                link.id = `link-${module.id}`;
+                link.className = 'sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors';
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    showView('module', module.id);
+                };
+                link.innerHTML = `
+                    <span data-lucide="${module.icon}" class="w-5 h-5"></span>
+                    <span class="ml-4 sidebar-text">${module.name}</span>
+                `;
+                moduleLinksContainer.appendChild(link);
+            });
+            
+            // Renderiza os ícones
+            lucide.createIcons();
+        }
+
+        /**
+         * Ativa o link do módulo selecionado na sidebar.
+         */
+        function setActiveLink(moduleId) {
+            // Remove a classe ativa de todos os links
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('bg-orange-500', 'text-white');
+            });
+
+            if (moduleId && moduleId.startsWith('settings_')) {
+                // Ativa o link de Configurações
+                const settingsLink = document.querySelector('a[onclick^="showView(\'settings_"]');
+                if (settingsLink) {
+                    settingsLink.classList.add('bg-orange-500', 'text-white');
+                }
+            } else if (moduleId) {
+                // Ativa o link do módulo
+                const activeLink = document.getElementById(`link-${moduleId}`);
+                if (activeLink) {
+                    activeLink.classList.add('bg-orange-500', 'text-white');
+                }
+            }
+            // Se moduleId for null (como na welcome view), nenhum link fica ativo
+        }
+
+        /**
+         * Controla qual visão principal é exibida (boas-vindas, iframe, configurações).
+         */
+        function showView(viewId, param = null) {
+            // Esconde todas as visões principais
+            welcomeView.classList.add('hidden');
+            iframeView.classList.add('hidden');
+            settingsView.classList.add('hidden');
+            iframeError.classList.add('hidden');
+
+            if (viewId === 'welcome') {
+                welcomeView.classList.remove('hidden');
+                setActiveLink(null);
+            } 
+            else if (viewId === 'module') {
+                const moduleId = param;
+                const url = moduleUrls[moduleId];
+                
+                iframeView.classList.remove('hidden');
+                moduleIframe.src = 'about:blank'; // Limpa o iframe
+                
+                // Define a URL e o manipulador de erro
+                moduleIframe.src = url;
+                blockedUrlEl.textContent = url;
+                
+                // Simula a detecção de X-Frame-Options (difícil de fazer 100%)
+                // Vamos usar um 'onerror', embora 'onload' com detecção de conteúdo seja mais robusto
+                // 'onerror' não é confiavel para X-Frame-Options, mas 'onload' pode disparar.
+                // A melhor abordagem é um timeout. Se o 'onload' não disparar em X segundos, assuma que bloqueou.
+                
+                // Limpa handlers anteriores
+                moduleIframe.onload = null;
+                moduleIframe.onerror = null;
+
+                // Define um timeout para o caso de a página carregar mas ser bloqueada (o onload pode não disparar)
+                const loadTimeout = setTimeout(() => {
+                    iframeError.classList.remove('hidden');
+                }, 3000); // 3 segundos
+
+                moduleIframe.onload = () => {
+                    clearTimeout(loadTimeout); // Carregou com sucesso
+                    iframeError.classList.add('hidden');
+                };
+                
+                moduleIframe.onerror = () => {
+                     clearTimeout(loadTimeout); // Erro de carregamento
+                     iframeError.classList.remove('hidden');
+                };
+
+                setActiveLink(moduleId);
+            } 
+            else if (viewId.startsWith('settings_')) {
+                const subView = viewId.split('_')[1];
+                settingsView.classList.remove('hidden');
+                renderSettings(subView);
+                setActiveLink('settings_');
+            }
+        }
+
+
+            // --- FUNÇÕES DE CONFIGURAÇÕES ---
+
+        /**
+         * Renderiza o conteúdo da aba de configurações selecionada.
+         */
+        function renderSettings(subView) {
+            // Atualiza o estado das abas
+            settingsTabs.querySelectorAll('.settings-tab-link').forEach(tab => {
+                if (tab.dataset.tab === subView) {
+                    tab.classList.add('border-orange-500', 'text-orange-600');
+                    tab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                } else {
+                    tab.classList.remove('border-orange-500', 'text-orange-600');
+                    tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                }
+            });
+
+            // Renderiza o conteúdo da aba
+            if (subView === 'access') {
+                renderAccessSettings();
+            } else if (subView === 'urls') {
+                renderUrlsSettings();
+            } else if (subView === 'theme') {
+                renderThemeSettings();
+            } else if (subView === 'users') {
+                renderUsersSettings();
+            }
+        }
+
+        /**
+         * Renderiza a aba "Regras de Acesso".
+         */
+        function renderAccessSettings() {
+            let html = `
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Gerenciar Acesso aos Módulos</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Módulo</th>
+            `;
+            // Cabeçalhos da tabela
+            demoUsers.forEach(user => {
+                html += `<th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">${user.name}</th>`;
+            });
+            html += `</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+
+            // Linhas da tabela
+            allModules.forEach(module => {
+                html += `<tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <span class="text-gray-600" data-lucide="${module.icon}"></span>
+                                    <span class="ml-3 font-medium text-gray-800">${module.name}</span>
+                                </div>
+                            </td>
+                `;
+                demoUsers.forEach(user => {
+                    const hasAccess = userAccess[user.email]?.includes(module.id);
+                    html += `
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <input type="checkbox" 
+                                   class="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                                   ${hasAccess ? 'checked' : ''}
+                                   onchange="updateAccess('${user.email}', '${module.id}', this.checked)">
+                        </td>
+                    `;
+                });
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            settingsContent.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        /**
+         * Renderiza a aba "URLs dos Módulos".
+         */
+        function renderUrlsSettings() {
+            let html = `<h2 class="text-xl font-semibold text-gray-800 mb-4">Configurar URLs dos Módulos</h2>
+                        <div class="space-y-4 max-w-2xl">`;
+            
+            allModules.forEach(module => {
+                const url = moduleUrls[module.id] || '';
+                html += `
+                    <div>
+                        <label for="url-${module.id}" class="block text-sm font-medium text-gray-700">${module.name}</label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                                <span data-lucide="link" class="w-4 h-4"></span>
+                            </span>
+                            <input type="text" 
+                                   id="url-${module.id}" 
+                                   class="flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 p-2 focus:ring-orange-500 focus:border-orange-500"
+                                   value="${url}"
+                                   oninput="updateUrl('${module.id}', this.value)"
+                                   placeholder="https://...">
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            settingsContent.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        /**
+         * Renderiza a aba "Tema e Aparência".
+         */
+        function renderThemeSettings() {
+            const isDark = document.documentElement.classList.contains('dark');
+            settingsContent.innerHTML = `
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Tema e Aparência</h2>
+                <div class="flex items-center justify-between max-w-md">
+                    <span class="text-gray-700">Modo Escuro</span>
+                    <button onclick="toggleTheme()" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${isDark ? 'bg-orange-500' : 'bg-gray-200'}">
+                        <span class="inline-block w-4 h-4 transform ${isDark ? 'translate-x-6' : 'translate-x-1'} bg-white rounded-full transition-transform"></span>
+                    </button>
+                </div>
+            `;
+        }
+
+        /**
+         * Renderiza a aba "Usuários" (apenas demonstração).
+         */
+        function renderUsersSettings() {
+            let html = `<h2 class="text-xl font-semibold text-gray-800 mb-4">Gerenciar Usuários</h2>
+                        <p class="text-sm text-gray-600 mb-4">Esta é uma visualização de como o gerenciamento de usuários funcionaria. Novos usuários poderiam ser adicionados aqui.</p>
+                        <ul class="divide-y divide-gray-200 max-w-md border border-gray-200 rounded-lg">`;
+            
+            demoUsers.forEach(user => {
+                html += `
+                    <li class="p-4 flex justify-between items-center">
+                        <div>
+                            <div class="font-medium text-gray-800">${user.name}</div>
+                            <div class="text-sm text-gray-500">${user.email}</div>
+                        </div>
+                        <button class="text-sm text-orange-600 hover:text-orange-800">Editar</button>
+                    </li>
+                `;
+            });
+            
+            html += `</ul>
+                     <button class="mt-6 px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                        Adicionar Novo Usuário
+                     </button>`;
+            
+            settingsContent.innerHTML = html;
+        }
+
+
+            // --- FUNÇÕES DE ATUALIZAÇÃO DE ESTADO ---
+
+        /**
+         * Atualiza as permissões de acesso no estado.
+         */
+        window.updateAccess = function(userEmail, moduleId, hasAccess) {
+            const userPermissions = userAccess[userEmail] || [];
+            if (hasAccess) {
+                // Adiciona o módulo se não existir
+                if (!userPermissions.includes(moduleId)) {
+                    userPermissions.push(moduleId);
+                }
+            } else {
+                // Remove o módulo
+                const index = userPermissions.indexOf(moduleId);
+                if (index > -1) {
+                    userPermissions.splice(index, 1);
+                }
+            }
+            userAccess[userEmail] = userPermissions;
+
+            // Se o usuário atual for o usuário sendo editado, atualiza a sidebar
+            if (currentUser && currentUser.email === userEmail) {
+                renderSidebar();
+            }
+        }
+
+        /**
+         * Atualiza as URLs no estado.
+         */
+        window.updateUrl = function(moduleId, newUrl) {
+            moduleUrls[moduleId] = newUrl;
+        }
+
+        /**
+         * Alterna o tema entre claro e escuro.
+         */
+        window.toggleTheme = function() {
+            document.documentElement.classList.toggle('dark');
+            renderSettings('theme'); // Re-renderiza a aba para atualizar o botão
+        }
+
+        // --- INICIALIZAÇÃO ---
+
+        // Adiciona listener ao formulário de login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loginErrorMsg.classList.add('hidden');
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            // Validação da senha de demo
+            if (password !== '123456') {
+                loginErrorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Validação do email de demo
+            const validUser = demoUsers.find(u => u.email === email);
+            if (validUser) {
+                performLogin(email);
+            } else {
+                loginErrorMsg.classList.remove('hidden');
+            }
+        });
+
+        // Adiciona listeners de clique nas abas de configurações
+        settingsTabs.addEventListener('click', (e) => {
+            e.preventDefault();
+            const link = e.target.closest('.settings-tab-link');
+            if (link) {
+                renderSettings(link.dataset.tab);
+            }
+        });
+
+        // Espera o DOM estar pronto para garantir que o 'lucide' esteja carregado
+        // (Embora o script no final do body geralmente funcione, DOMContentLoaded é mais seguro)
+        document.addEventListener("DOMContentLoaded", () => {
+            // Verifica se o lucide realmente carregou antes de tentar usá-lo
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.error("Lucide icons could not be loaded.");
+            }
+        });
+
+    </script>
+</body>
+</html>
+
+
