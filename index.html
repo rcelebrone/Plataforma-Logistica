@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carrega a biblioteca de ícones Lucide (Corrigido) -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Carrega a Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Estilo para a barra de rolagem (web) */
         ::-webkit-scrollbar {
@@ -169,10 +171,47 @@
         <!-- Conteúdo Principal -->
         <main id="main-content" class="ml-64 bg-gray-100 min-h-screen transition-all duration-300">
             
-            <!-- Tela de Boas-Vindas -->
-            <div id="welcome-view" class="p-8">
-                <h1 class="text-3xl font-bold text-gray-800">Bem-vindo à Plataforma Logística</h1>
-                <p class="mt-2 text-gray-600">Selecione um módulo na barra lateral esquerda para começar.</p>
+            <!-- Tela do Dashboard (antiga Boas-Vindas) -->
+            <div id="dashboard-view" class="p-6 lg:p-10">
+                <h1 class="text-3xl font-bold text-gray-800">Dashboard Logístico</h1>
+                <p class="mt-2 text-gray-600">Visão geral da operação em tempo real.</p>
+                
+                <!-- Grid de Gráficos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    
+                    <!-- Gráfico 1: Ocorrências -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Ocorrências (Últimos 7 dias)</h3>
+                        <div class="h-64">
+                            <canvas id="ocorrenciasChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico 2: Reversa -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Logística Reversa (Últimos 7 dias)</h3>
+                        <div class="h-64">
+                            <canvas id="reversaChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico 3: Volume por CD -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Volume no Piso (Últimas 24h)</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="volumePisoChart" style="max-height: 250px;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico 4: Tempo de Expedição -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">TME por CD (Últimos 30d)</h3>
+                        <div class="h-64">
+                            <canvas id="tempoExpedicaoChart"></canvas>
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
 
             <!-- Container do Iframe -->
@@ -192,16 +231,16 @@
                 <!-- Abas de Navegação das Configurações -->
                 <div class="border-b border-gray-200 mb-6">
                     <nav id="settings-tabs" class="flex space-x-6 -mb-px" aria-label="Tabs">
-                        <a href="#" data-tab="access" class="settings-tab-link border-orange-500 text-orange-600 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                        <a href="#" data-tab="access" class="settings-tab-link border-orange-500 text-orange-600 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
                             Regras de Acesso
                         </a>
-                        <a href="#" data-tab="urls" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                        <a href="#" data-tab="urls" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
                             URLs dos Módulos
                         </a>
-                        <a href="#" data-tab="theme" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                        <a href="#" data-tab="theme" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
                             Tema e Aparência
                         </a>
-                        <a href="#" data-tab="users" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowiam py-3 px-1 border-b-2 font-medium text-sm">
+                        <a href="#" data-tab="users" class="settings-tab-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
                             Usuários
                         </a>
                     </nav>
@@ -253,6 +292,13 @@
             { email: 'rodrigo.celebrone@madeiramadeira.com.br', name: 'Rodrigo Celebrone' },
             { email: 'luiz.pontara@madeiramadeira.com.br', name: 'Luiz Pontara' }
         ];
+        
+        // --- GRÁFICOS ---
+        let chartInstances = {};
+        // Define a cor padrão do texto do Chart.js com base no tema
+        if (typeof Chart !== 'undefined') {
+             Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#6b7281';
+        }
 
 
         // --- ELEMENTOS DOM ---
@@ -266,7 +312,7 @@
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('main-content');
         const moduleLinksContainer = document.getElementById('module-links');
-        const welcomeView = document.getElementById('welcome-view');
+        const dashboardView = document.getElementById('dashboard-view');
         const iframeView = document.getElementById('iframe-view');
         const moduleIframe = document.getElementById('module-iframe');
         const iframeError = document.getElementById('iframe-error');
@@ -392,14 +438,20 @@
          * Controla qual visão principal é exibida (boas-vindas, iframe, configurações).
          */
         function showView(viewId, param = null) {
+            // Destrói os gráficos se estivermos saindo do dashboard
+            if (viewId !== 'welcome') {
+                destroyCharts();
+            }
+            
             // Esconde todas as visões principais
-            welcomeView.classList.add('hidden');
+            dashboardView.classList.add('hidden');
             iframeView.classList.add('hidden');
             settingsView.classList.add('hidden');
             iframeError.classList.add('hidden');
 
             if (viewId === 'welcome') {
-                welcomeView.classList.remove('hidden');
+                dashboardView.classList.remove('hidden');
+                renderDashboardCharts(); // Renderiza os gráficos
                 setActiveLink(null);
             } 
             else if (viewId === 'module') {
@@ -449,6 +501,129 @@
 
 
             // --- FUNÇÕES DE CONFIGURAÇÕES ---
+            
+        /**
+         * Destrói todas as instâncias ativas de gráficos.
+         */
+        function destroyCharts() {
+            Object.values(chartInstances).forEach(chart => {
+                if (chart) {
+                    chart.destroy();
+                }
+            });
+            chartInstances = {};
+        }
+        
+        /**
+         * Renderiza todos os gráficos do dashboard.
+         */
+        function renderDashboardCharts() {
+            // Garante que os gráficos antigos sejam destruídos antes de renderizar novos
+            destroyCharts();
+            
+            const orangeColor = '#F97316';
+            const orangeColorTransparent = 'rgba(249, 115, 22, 0.6)';
+            
+            // Gráfico 1: Ocorrências
+            const ctxOcorrencias = document.getElementById('ocorrenciasChart')?.getContext('2d');
+            if (ctxOcorrencias) {
+                chartInstances.ocorrencias = new Chart(ctxOcorrencias, {
+                    type: 'line',
+                    data: {
+                        labels: ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Ontem', 'Hoje'],
+                        datasets: [{
+                            label: 'Ocorrências',
+                            data: [12, 19, 8, 15, 10, 13, 17],
+                            borderColor: orangeColor,
+                            backgroundColor: orangeColorTransparent,
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Gráfico 2: Reversa
+            const ctxReversa = document.getElementById('reversaChart')?.getContext('2d');
+            if (ctxReversa) {
+                chartInstances.reversa = new Chart(ctxReversa, {
+                    type: 'bar',
+                    data: {
+                        labels: ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Ontem', 'Hoje'],
+                        datasets: [{
+                            label: 'Coletas de Reversa',
+                            data: [5, 8, 6, 4, 7, 5, 9],
+                            backgroundColor: orangeColorTransparent,
+                            borderColor: orangeColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Gráfico 3: Volume por CD
+            const ctxVolume = document.getElementById('volumePisoChart')?.getContext('2d');
+            if (ctxVolume) {
+                chartInstances.volume = new Chart(ctxVolume, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Ubá', 'Cajamar', 'São José', 'Salvador'],
+                        datasets: [{
+                            label: 'Volume no Piso',
+                            data: [30, 7, 13, 56],
+                            backgroundColor: [
+                                'rgba(249, 115, 22, 0.8)', // Laranja
+                                'rgba(55, 65, 81, 0.8)',   // Cinza Escuro
+                                'rgba(156, 163, 175, 0.8)',// Cinza Médio
+                                'rgba(17, 24, 39, 0.8)'    // Preto/Cinza
+                            ],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            // Gráfico 4: Tempo de Expedição
+            const ctxTempo = document.getElementById('tempoExpedicaoChart')?.getContext('2d');
+            if (ctxTempo) {
+                chartInstances.tempo = new Chart(ctxTempo, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ubá', 'Cajamar', 'Salvador'],
+                        datasets: [{
+                            label: 'Tempo Médio (horas)',
+                            data: [5, 2, 8],
+                            backgroundColor: orangeColorTransparent,
+                            borderColor: orangeColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
 
         /**
          * Renderiza o conteúdo da aba de configurações selecionada.
@@ -640,7 +815,22 @@
          */
         window.toggleTheme = function() {
             document.documentElement.classList.toggle('dark');
-            renderSettings('theme'); // Re-renderiza a aba para atualizar o botão
+            
+            // Atualiza a cor padrão dos gráficos
+            if (typeof Chart !== 'undefined') {
+                Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#6b7281';
+            }
+
+            // Re-renderiza a aba de tema
+            if (!settingsView.classList.contains('hidden')) {
+                renderSettings('theme');
+            }
+            
+            // Se o dashboard estiver visível, re-renderiza os gráficos com o novo tema
+            if (!dashboardView.classList.contains('hidden')) {
+                destroyCharts();
+                renderDashboardCharts();
+            }
         }
 
         // --- INICIALIZAÇÃO ---
@@ -691,5 +881,4 @@
     </script>
 </body>
 </html>
-
 
