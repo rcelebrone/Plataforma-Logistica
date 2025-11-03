@@ -386,6 +386,22 @@
          */
         function renderSidebar() {
             moduleLinksContainer.innerHTML = '';
+            
+            // Adiciona o link do Dashboard (Home)
+            const dashboardLink = document.createElement('a');
+            dashboardLink.href = '#';
+            dashboardLink.id = 'link-dashboard'; // ID para ativar o link
+            dashboardLink.className = 'sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors';
+            dashboardLink.onclick = (e) => {
+                e.preventDefault();
+                showView('welcome');
+            };
+            dashboardLink.innerHTML = `
+                <span data-lucide="home" class="w-5 h-5"></span>
+                <span class="ml-4 sidebar-text">Dashboard</span>
+            `;
+            moduleLinksContainer.appendChild(dashboardLink);
+            
             const accessibleModuleIds = userAccess[currentUser.email] || [];
             const accessibleModules = allModules.filter(m => accessibleModuleIds.includes(m.id));
 
@@ -418,7 +434,13 @@
                 link.classList.remove('bg-orange-500', 'text-white');
             });
 
-            if (moduleId && moduleId.startsWith('settings_')) {
+            if (moduleId === null || moduleId === 'welcome') {
+                // Ativa o link do Dashboard
+                const dashboardLink = document.getElementById('link-dashboard');
+                if (dashboardLink) {
+                    dashboardLink.classList.add('bg-orange-500', 'text-white');
+                }
+            } else if (moduleId && moduleId.startsWith('settings_')) {
                 // Ativa o link de Configurações
                 const settingsLink = document.querySelector('a[onclick^="showView(\'settings_"]');
                 if (settingsLink) {
@@ -431,7 +453,7 @@
                     activeLink.classList.add('bg-orange-500', 'text-white');
                 }
             }
-            // Se moduleId for null (como na welcome view), nenhum link fica ativo
+            // Se moduleId for null (como na welcome view), o link do dashboard será ativado
         }
 
         /**
@@ -881,4 +903,5 @@
     </script>
 </body>
 </html>
+
 
